@@ -4,7 +4,8 @@
 
 Cast Off is a Go-based Kubernetes controller that orchestrates node-by-node Cilium pod refreshes after a detected Cilium version change or Cilium ConfigMap change.
 
-> Warning: Cast Off is currently an early release. Interfaces and behavior may change as the project matures.
+> [!IMPORTANT]
+> Cast Off is currently an early release. Interfaces and behavior may change as the project matures.
 >
 > Issues can be raised in the Cast Off GitHub repository. External contributions are not expected at this time, and will be considered and welcomed in the future once the project is more mature and stable.
 
