@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cast-off
+description: Cast Off controller for orchestrating Cilium node rollouts
+type: application
+version: 0.0.1
+appVersion: "0.0.1"

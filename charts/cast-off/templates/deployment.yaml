@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cast-off.fullname" . }}
+  namespace: {{ .Values.config.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "cast-off.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "cast-off.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "cast-off.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "cast-off.serviceAccountName" . }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.config.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: cast-off
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          env:
+            - name: HELM_RELEASE_NAME
+              value: {{ .Values.config.helmReleaseName | quote }}
+            - name: NAMESPACE
+              value: {{ .Values.config.namespace | quote }}
+            - name: CHECK_INTERVAL_MINUTES
+              value: {{ .Values.config.checkIntervalMinutes | quote }}
+            - name: TERMINATION_GRACE_PERIOD_SECONDS
+              value: {{ .Values.config.terminationGracePeriodSeconds | quote }}
+            - name: DRAIN_TIMEOUT_SECONDS
+              value: {{ .Values.config.drainTimeoutSeconds | quote }}
+            - name: POD_RESTART_TIMEOUT_SECONDS
+              value: {{ .Values.config.podRestartTimeoutSeconds | quote }}
+            - name: RETRY_BACKOFF_SECONDS
+              value: {{ .Values.config.retryBackoffSeconds | quote }}
+            - name: MAX_RETRIES
+              value: {{ .Values.config.maxRetries | quote }}
+            - name: LEASE_NAME
+              value: {{ .Values.config.leaseName | quote }}
+            - name: STATE_CONFIGMAP_NAME
+              value: {{ .Values.config.stateConfigMapName | quote }}
+            - name: CILIUM_NAMESPACE
+              value: {{ .Values.config.ciliumNamespace | quote }}
+            {{- if ne .Values.config.manageEnvoySafeRollout nil }}
+            - name: MANAGE_ENVOY_SAFE_ROLLOUT
+              value: {{ .Values.config.manageEnvoySafeRollout | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- range . }}
+        - maxSkew: {{ .maxSkew }}
+          topologyKey: {{ .topologyKey | quote }}
+          whenUnsatisfiable: {{ .whenUnsatisfiable }}
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ include "cast-off.name" $ }}
+              app.kubernetes.io/instance: {{ $.Release.Name }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

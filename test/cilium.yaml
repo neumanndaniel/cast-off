@@ -1,0 +1,23 @@
+cluster:
+  name: kind
+cni:
+  exclusive: true
+envoy:
+  rollOutPods: false
+  updateStrategy:
+    type: OnDelete
+ipam:
+  operator:
+    clusterPoolIPv4PodCIDRList:
+      - 100.64.0.0/10
+image:
+  pullPolicy: IfNotPresent
+kubeProxyReplacement: true
+nodeinit:
+  enabled: true
+operator:
+  replicas: 1
+  rollOutPods: true
+rollOutCiliumPods: false
+updateStrategy:
+  type: OnDelete

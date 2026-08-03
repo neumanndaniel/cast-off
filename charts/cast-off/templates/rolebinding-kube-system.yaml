@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "cast-off.fullname" . }}-{{ .Values.config.ciliumNamespace }}
+  namespace: {{ .Values.config.ciliumNamespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "cast-off.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "cast-off.serviceAccountName" . }}
+    namespace: {{ .Values.config.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "cast-off.fullname" . }}-{{ .Values.config.ciliumNamespace }}

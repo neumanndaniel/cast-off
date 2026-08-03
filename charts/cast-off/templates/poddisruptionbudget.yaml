@@ -1,0 +1,17 @@
+{{- if ge (int .Values.replicaCount) 2 }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "cast-off.fullname" . }}
+  namespace: {{ .Values.config.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "cast-off.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  unhealthyPodEvictionPolicy: {{ .Values.podDisruptionBudget.unhealthyPodEvictionPolicy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "cast-off.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

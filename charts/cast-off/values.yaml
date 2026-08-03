@@ -1,0 +1,75 @@
+replicaCount: 2
+
+image:
+  repository: quay.io/neumanndaniel/cast-off
+  pullPolicy: IfNotPresent
+  tag: "v0.0.1"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+priorityClassName: system-cluster-critical
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  - key: CriticalAddonsOnly
+    operator: Exists
+
+affinity: {}
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: DoNotSchedule
+
+podDisruptionBudget:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+
+config:
+  helmReleaseName: cilium
+  namespace: cast-off
+  checkIntervalMinutes: 5
+  terminationGracePeriodSeconds: 30
+  drainTimeoutSeconds: 600
+  podRestartTimeoutSeconds: 300
+  retryBackoffSeconds: 10
+  maxRetries: 3
+  leaseName: cast-off-leader-election
+  stateConfigMapName: cast-off-cilium
+  ciliumNamespace: kube-system
+  manageEnvoySafeRollout: null
